@@ -22,15 +22,37 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const app = (0, express_1.default)();
-const PORT = 5001;
 const dotenv = __importStar(require("dotenv"));
 dotenv.config({ path: ".env.development.local" });
-app.listen(PORT, () => {
-    console.log(`Express server listening on port: ${PORT}`);
-});
+// Update with your config settings.
+const config = {
+    development: {
+        client: "mysql2",
+        connection: {
+            host: "127.0.0.1",
+            database: process.env.DB_LOCAL_DBNAME,
+            user: process.env.DB_LOCAL_USER,
+            password: process.env.DB_LOCAL_PASSWORD,
+        },
+        migrations: {
+            directory: "./migrations",
+        },
+    },
+    // production: {
+    //     client: "postgresql",
+    //     connection: {
+    //         database: "my_db",
+    //         user: "username",
+    //         password: "password",
+    //     },
+    //     pool: {
+    //         min: 2,
+    //         max: 10,
+    //     },
+    //     migrations: {
+    //         tableName: "knex_migrations",
+    //     },
+    // },
+};
+module.exports = config;

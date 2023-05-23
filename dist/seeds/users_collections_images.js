@@ -19,9 +19,9 @@ const collection_images_1 = __importDefault(require("../seed_data/collection_ima
 function seed(knex) {
     return __awaiter(this, void 0, void 0, function* () {
         // Deletes ALL existing entries
-        yield knex("users").del();
-        yield knex("collections").del();
         yield knex("collection_images").del();
+        yield knex("collections").del();
+        yield knex("users").del();
         // Inserts seed entries
         yield knex("users").insert(users_1.default);
         yield knex("collections").insert(collections_1.default);

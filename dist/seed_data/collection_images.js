@@ -85,6 +85,8 @@ const collectionImagesData = [
         id: "114875ee-e638-4dea-9857-40f861c9774c",
         image: "DSC_0917.jpg",
         title: "Wandering in Istanbul, Turkey",
+        latitude: 41.0117281250595,
+        longitude: 28.968129846598855,
         post_id: "144875ee-e638-4dea-9857-40f861c9774c",
     },
     {

@@ -1,4 +1,4 @@
-module.exports = [
+const collectionImagesData = [
     {
         id: "144875fe-e638-4dea-9857-40f861c9774c",
         image: "DSC_0591.jpg",
@@ -134,3 +134,5 @@ module.exports = [
         post_id: "144875ee-e638-4dea-9857-40f861c9774c",
     },
 ];
+
+export default collectionImagesData;

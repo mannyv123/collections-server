@@ -1,4 +1,4 @@
-module.exports = [
+const collectionsData = [
     {
         id: "134875ee-e638-4dea-9857-40f861c9774c",
         title: "My time in Croatia!",
@@ -14,3 +14,5 @@ module.exports = [
         user_id: "174875ee-e638-4dea-9857-40f861c9774c",
     },
 ];
+
+export default collectionsData;

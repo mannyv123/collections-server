@@ -1,12 +1,14 @@
 "use strict";
-module.exports = [
+Object.defineProperty(exports, "__esModule", { value: true });
+const usersData = [
     {
         id: "174875ee-e638-4dea-9857-40f861c9774c",
         username: "kevin_rodrigues",
         password: "password1",
         email: "1something@something.com",
+        first_name: "Kevin",
+        last_name: "Rodrigues",
         profileImg: "kawe-rodrigues-Xnk_LLrltkc-unsplash.jpg",
-        name: "Kevin Rodrigues",
         about: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
         setup: "Nikon D3500 DSLR w/ Nikon 50mm f/1.8G AF-S NIKKOR FX Lens",
     },
@@ -31,3 +33,4 @@ module.exports = [
         setup: "Nikon D3500 DSLR w/ Nikon 50mm f/1.8G AF-S NIKKOR FX Lens",
     },
 ];
+exports.default = usersData;

@@ -24,7 +24,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv = __importStar(require("dotenv"));
-dotenv.config();
+dotenv.config({ path: ".env.development.local" });
 // Update with your config settings.
 const config = {
     development: {

@@ -1,6 +1,6 @@
 import type { Knex } from "knex";
 import * as dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: ".env.development.local" });
 
 // Update with your config settings.
 

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { S3Client, GetObjectCommand, S3ClientConfig } from "@aws-sdk/client-s3";
 import knex from "knex";
 import config from "../knexfile";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 const db = knex(config.development);
 
 //AWS S3 Configuration
@@ -28,6 +29,7 @@ const s3 = new S3Client(s3Config);
 interface ImageInfo {
     id: string;
     image: string;
+    imageUrl: string;
     title: string;
     latitude: number;
     longitude: number;
@@ -39,6 +41,7 @@ interface Collection {
     description: string;
     user_id: string;
     collection_images: ImageInfo[];
+    // imageUrls: string[];
 }
 
 //Get All Collections
@@ -46,6 +49,21 @@ export const getCollections = async (req: Request, res: Response): Promise<void>
     try {
         // Run db query function and save in variable
         const result: Collection[] = await getCollectionsFromDb();
+
+        //Get images from S3 bucket
+        for (const collection of result) {
+            const imageUrls: string[] = [];
+
+            for (const imageInfo of collection.collection_images) {
+                const getObjectParams = {
+                    Bucket: bucketName,
+                    Key: imageInfo.image,
+                };
+                const command = new GetObjectCommand(getObjectParams);
+                const url = await getSignedUrl(s3, command, { expiresIn: 300 });
+                imageInfo.imageUrl = url;
+            }
+        }
 
         res.send(result);
     } catch (error) {
@@ -92,6 +110,7 @@ async function getCollectionsFromDb(): Promise<Collection[]> {
                 description: row.description,
                 user_id: row.user_id,
                 collection_images: [],
+                // imageUrls: [],
             };
             collections.push(collection);
         }
@@ -100,6 +119,7 @@ async function getCollectionsFromDb(): Promise<Collection[]> {
             const image: ImageInfo = {
                 id: row.image_id,
                 image: row.image,
+                imageUrl: "",
                 title: row.image_title,
                 latitude: row.latitude,
                 longitude: row.longitude,

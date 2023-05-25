@@ -16,6 +16,7 @@ exports.getCollections = void 0;
 const client_s3_1 = require("@aws-sdk/client-s3");
 const knex_1 = __importDefault(require("knex"));
 const knexfile_1 = __importDefault(require("../knexfile"));
+const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
 const db = (0, knex_1.default)(knexfile_1.default.development);
 //AWS S3 Configuration
 const bucketName = process.env.BUCKET_NAME;
@@ -38,6 +39,19 @@ const getCollections = (req, res) => __awaiter(void 0, void 0, void 0, function*
     try {
         // Run db query function and save in variable
         const result = yield getCollectionsFromDb();
+        //Get images from S3 bucket
+        for (const collection of result) {
+            const imageUrls = [];
+            for (const imageInfo of collection.collection_images) {
+                const getObjectParams = {
+                    Bucket: bucketName,
+                    Key: imageInfo.image,
+                };
+                const command = new client_s3_1.GetObjectCommand(getObjectParams);
+                const url = yield (0, s3_request_presigner_1.getSignedUrl)(s3, command, { expiresIn: 300 });
+                imageInfo.imageUrl = url;
+            }
+        }
         res.send(result);
     }
     catch (error) {
@@ -67,6 +81,7 @@ function getCollectionsFromDb() {
                     description: row.description,
                     user_id: row.user_id,
                     collection_images: [],
+                    // imageUrls: [],
                 };
                 collections.push(collection);
             }
@@ -74,6 +89,7 @@ function getCollectionsFromDb() {
                 const image = {
                     id: row.image_id,
                     image: row.image,
+                    imageUrl: "",
                     title: row.image_title,
                     latitude: row.latitude,
                     longitude: row.longitude,

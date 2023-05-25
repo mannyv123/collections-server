@@ -52,8 +52,6 @@ export const getCollections = async (req: Request, res: Response): Promise<void>
 
         //Get images from S3 bucket
         for (const collection of result) {
-            const imageUrls: string[] = [];
-
             for (const imageInfo of collection.collection_images) {
                 const getObjectParams = {
                     Bucket: bucketName,

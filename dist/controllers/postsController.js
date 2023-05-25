@@ -41,7 +41,6 @@ const getCollections = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const result = yield getCollectionsFromDb();
         //Get images from S3 bucket
         for (const collection of result) {
-            const imageUrls = [];
             for (const imageInfo of collection.collection_images) {
                 const getObjectParams = {
                     Bucket: bucketName,

@@ -33,7 +33,20 @@ const s3Config = {
     region: bucketRegion,
 };
 const s3 = new client_s3_1.S3Client(s3Config);
-function getCollectionsFunc() {
+//Get All Collections
+const getCollections = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Run db query function and save in variable
+        const result = yield getCollectionsFromDb();
+        res.send(result);
+    }
+    catch (error) {
+        console.log(error);
+    }
+});
+exports.getCollections = getCollections;
+//async function to query db and return as type Collection[]
+function getCollectionsFromDb() {
     return __awaiter(this, void 0, void 0, function* () {
         const rows = yield db
             .select("collections.id", "collections.title", "collections.description", "collections.user_id", "collection_images.id as image_id", "collection_images.image", "collection_images.title as image_title", "collection_images.latitude", "collection_images.longitude")
@@ -71,29 +84,3 @@ function getCollectionsFunc() {
         return collections;
     });
 }
-//Get All Collections
-const getCollections = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        // Query DB for collections and image info
-        // const result = (await db("collections")
-        //     .select(
-        //         "collections.id",
-        //         "collections.title",
-        //         "collections.description",
-        //         "collections.user_id",
-        //         db.raw(
-        //             "JSON_ARRAYAGG(JSON_OBJECT('id', collection_images.id, 'image', collection_images.image, 'title', collection_images.title, 'latitude', collection_images.latitude, 'longitude', collection_images.longitude)) as collection_images"
-        //         )
-        //     )
-        //     .leftJoin("collection_images", "collections.id", "collection_images.post_id")
-        //     .groupBy("collections.id")
-        //     .orderBy("collections.created_at", "collections.title")) as Collection[];
-        const result = yield getCollectionsFunc();
-        console.log(result);
-        res.send(result);
-    }
-    catch (error) {
-        console.log(error);
-    }
-});
-exports.getCollections = getCollections;

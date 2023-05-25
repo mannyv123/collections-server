@@ -41,7 +41,20 @@ interface Collection {
     collection_images: ImageInfo[];
 }
 
-async function getCollectionsFunc(): Promise<Collection[]> {
+//Get All Collections
+export const getCollections = async (req: Request, res: Response): Promise<void> => {
+    try {
+        // Run db query function and save in variable
+        const result: Collection[] = await getCollectionsFromDb();
+
+        res.send(result);
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+//async function to query db and return as type Collection[]
+async function getCollectionsFromDb(): Promise<Collection[]> {
     const rows = await db
         .select(
             "collections.id",
@@ -96,31 +109,3 @@ async function getCollectionsFunc(): Promise<Collection[]> {
     }
     return collections;
 }
-
-//Get All Collections
-export const getCollections = async (req: Request, res: Response): Promise<void> => {
-    try {
-        // Query DB for collections and image info
-
-        // const result = (await db("collections")
-        //     .select(
-        //         "collections.id",
-        //         "collections.title",
-        //         "collections.description",
-        //         "collections.user_id",
-        //         db.raw(
-        //             "JSON_ARRAYAGG(JSON_OBJECT('id', collection_images.id, 'image', collection_images.image, 'title', collection_images.title, 'latitude', collection_images.latitude, 'longitude', collection_images.longitude)) as collection_images"
-        //         )
-        //     )
-        //     .leftJoin("collection_images", "collections.id", "collection_images.post_id")
-        //     .groupBy("collections.id")
-        //     .orderBy("collections.created_at", "collections.title")) as Collection[];
-
-        const result = await getCollectionsFunc();
-
-        console.log(result);
-        res.send(result);
-    } catch (error) {
-        console.log(error);
-    }
-};

@@ -8,9 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCollections = void 0;
 const client_s3_1 = require("@aws-sdk/client-s3");
+const knex_1 = __importDefault(require("knex"));
+const knexfile_1 = __importDefault(require("../knexfile"));
+const db = (0, knex_1.default)(knexfile_1.default.development);
 //AWS S3 Configuration
 const bucketName = process.env.BUCKET_NAME;
 const bucketRegion = process.env.BUCKET_REGION;
@@ -27,10 +33,67 @@ const s3Config = {
     region: bucketRegion,
 };
 const s3 = new client_s3_1.S3Client(s3Config);
+function getCollectionsFunc() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const rows = yield db
+            .select("collections.id", "collections.title", "collections.description", "collections.user_id", "collection_images.id as image_id", "collection_images.image", "collection_images.title as image_title", "collection_images.latitude", "collection_images.longitude")
+            .from("collections")
+            .leftJoin(db
+            .select("id", "post_id", "image", "title", "latitude", "longitude")
+            .from("collection_images")
+            .as("collection_images"), "collections.id", "collection_images.post_id")
+            .groupBy("collections.id", "collection_images.id");
+        const collections = [];
+        for (const row of rows) {
+            const collectionId = row.id;
+            let collection = collections.find((p) => p.id === collectionId);
+            if (!collection) {
+                collection = {
+                    id: row.id,
+                    title: row.title,
+                    description: row.description,
+                    user_id: row.user_id,
+                    collection_images: [],
+                };
+                collections.push(collection);
+            }
+            if (row.image_id) {
+                const image = {
+                    id: row.image_id,
+                    image: row.image,
+                    title: row.image_title,
+                    latitude: row.latitude,
+                    longitude: row.longitude,
+                };
+                collection.collection_images.push(image);
+            }
+        }
+        return collections;
+    });
+}
 //Get All Collections
 const getCollections = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        // Query DB for collections and image info
+        // const result = (await db("collections")
+        //     .select(
+        //         "collections.id",
+        //         "collections.title",
+        //         "collections.description",
+        //         "collections.user_id",
+        //         db.raw(
+        //             "JSON_ARRAYAGG(JSON_OBJECT('id', collection_images.id, 'image', collection_images.image, 'title', collection_images.title, 'latitude', collection_images.latitude, 'longitude', collection_images.longitude)) as collection_images"
+        //         )
+        //     )
+        //     .leftJoin("collection_images", "collections.id", "collection_images.post_id")
+        //     .groupBy("collections.id")
+        //     .orderBy("collections.created_at", "collections.title")) as Collection[];
+        const result = yield getCollectionsFunc();
+        console.log(result);
+        res.send(result);
     }
-    catch (error) { }
+    catch (error) {
+        console.log(error);
+    }
 });
 exports.getCollections = getCollections;

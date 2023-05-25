@@ -52,9 +52,9 @@ function getCollectionsFromDb() {
             .select("collections.id", "collections.title", "collections.description", "collections.user_id", "collection_images.id as image_id", "collection_images.image", "collection_images.title as image_title", "collection_images.latitude", "collection_images.longitude")
             .from("collections")
             .leftJoin(db
-            .select("id", "post_id", "image", "title", "latitude", "longitude")
+            .select("id", "collection_id", "image", "title", "latitude", "longitude")
             .from("collection_images")
-            .as("collection_images"), "collections.id", "collection_images.post_id")
+            .as("collection_images"), "collections.id", "collection_images.collection_id")
             .groupBy("collections.id", "collection_images.id");
         const collections = [];
         for (const row of rows) {

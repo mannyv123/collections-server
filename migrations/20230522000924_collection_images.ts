@@ -8,7 +8,7 @@ export async function up(knex: Knex): Promise<void> {
         table.decimal("latitude", 9, 6);
         table.decimal("longitude", 9, 6);
         table
-            .string("post_id")
+            .string("collection_id")
             .notNullable()
             .references("id")
             .inTable("collections")

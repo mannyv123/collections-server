@@ -1,8 +1,31 @@
 import { Request, Response } from "express";
 import knex from "knex";
 import config from "../knexfile";
+const db = knex(config.development);
+import { S3Client, GetObjectCommand, S3ClientConfig } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import bcrypt from "bcrypt";
 import { v4 } from "uuid";
+
+//AWS S3 Configuration
+const bucketName: string | undefined = process.env.BUCKET_NAME;
+const bucketRegion: string | undefined = process.env.BUCKET_REGION;
+const accessKey: string | undefined = process.env.ACCESS_KEY;
+const secretAccessKey: string | undefined = process.env.SECRET_ACCESS_KEY;
+
+if (!bucketName || !bucketRegion || !accessKey || !secretAccessKey) {
+    throw new Error("Missing required environment variables for S3 configuration.");
+}
+
+const s3Config: S3ClientConfig = {
+    credentials: {
+        accessKeyId: accessKey,
+        secretAccessKey: secretAccessKey,
+    },
+    region: bucketRegion,
+};
+
+const s3 = new S3Client(s3Config);
 
 interface User {
     id: string;

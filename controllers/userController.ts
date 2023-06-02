@@ -43,13 +43,29 @@ interface User {
 export const postUser = async (req: Request, res: Response) => {
     //need to add error checking for missing fields
     try {
-        req.body.id = v4();
-
+        //Hash the provided password
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
-        console.log(req.body.id);
-        console.log(salt);
         console.log(hashedPassword);
+        //Create unique profile image and cover image name
+        const profileImg = v4();
+        const coverImg = v4();
+
+        //Update profile and cover image to S3
+        // const params = {
+        //     Bucket: bucketName,
+        //     Key: profileImg,
+        //     Body:
+
+        // }
+
+        //Add user to db
+        req.body.id = v4();
+        req.body.password = hashedPassword;
+        req.body.profile_img = profileImg;
+        req.body.cover_img = coverImg;
+        const result = await db("users").insert(req.body);
+        // res.status(200).send(result);
     } catch (error) {
         console.log(error);
         res.status(500).send();

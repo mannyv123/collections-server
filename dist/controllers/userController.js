@@ -13,17 +13,51 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loginUser = exports.postUser = void 0;
+const knex_1 = __importDefault(require("knex"));
+const knexfile_1 = __importDefault(require("../knexfile"));
+const db = (0, knex_1.default)(knexfile_1.default.development);
+const client_s3_1 = require("@aws-sdk/client-s3");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const uuid_1 = require("uuid");
+//AWS S3 Configuration
+const bucketName = process.env.BUCKET_NAME;
+const bucketRegion = process.env.BUCKET_REGION;
+const accessKey = process.env.ACCESS_KEY;
+const secretAccessKey = process.env.SECRET_ACCESS_KEY;
+if (!bucketName || !bucketRegion || !accessKey || !secretAccessKey) {
+    throw new Error("Missing required environment variables for S3 configuration.");
+}
+const s3Config = {
+    credentials: {
+        accessKeyId: accessKey,
+        secretAccessKey: secretAccessKey,
+    },
+    region: bucketRegion,
+};
+const s3 = new client_s3_1.S3Client(s3Config);
 const postUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //need to add error checking for missing fields
     try {
-        req.body.id = (0, uuid_1.v4)();
+        //Hash the provided password
         const salt = yield bcrypt_1.default.genSalt();
         const hashedPassword = yield bcrypt_1.default.hash(req.body.password, salt);
-        console.log(req.body.id);
-        console.log(salt);
         console.log(hashedPassword);
+        //Create unique profile image and cover image name
+        const profileImg = (0, uuid_1.v4)();
+        const coverImg = (0, uuid_1.v4)();
+        //Update profile and cover image to S3
+        // const params = {
+        //     Bucket: bucketName,
+        //     Key: profileImg,
+        //     Body:
+        // }
+        //Add user to db
+        req.body.id = (0, uuid_1.v4)();
+        req.body.password = hashedPassword;
+        req.body.profile_img = profileImg;
+        req.body.cover_img = coverImg;
+        const result = yield db("users").insert(req.body);
+        // res.status(200).send(result);
     }
     catch (error) {
         console.log(error);

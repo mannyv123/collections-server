@@ -2,13 +2,29 @@ import { Request, Response } from "express";
 import knex from "knex";
 import config from "../knexfile";
 import bcrypt from "bcrypt";
+import { v4 } from "uuid";
 
-// export const getLogin = async () => {};
+interface User {
+    id: string;
+    username: string;
+    password: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    about: string;
+    setup: string;
+    profileImg: string;
+    coverImg: string;
+}
 
 export const postUser = async (req: Request, res: Response) => {
+    //need to add error checking for missing fields
     try {
+        req.body.id = v4();
+
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
+        console.log(req.body.id);
         console.log(salt);
         console.log(hashedPassword);
     } catch (error) {

@@ -14,11 +14,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loginUser = exports.postUser = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
-// export const getLogin = async () => {};
+const uuid_1 = require("uuid");
 const postUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //need to add error checking for missing fields
     try {
+        req.body.id = (0, uuid_1.v4)();
         const salt = yield bcrypt_1.default.genSalt();
         const hashedPassword = yield bcrypt_1.default.hash(req.body.password, salt);
+        console.log(req.body.id);
         console.log(salt);
         console.log(hashedPassword);
     }

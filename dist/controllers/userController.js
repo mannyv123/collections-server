@@ -28,5 +28,27 @@ const postUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.postUser = postUser;
-const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () { });
+const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //temporary
+    const user = {
+        username: "bob",
+        password: "password",
+    };
+    // const user = users.find(user) need to find a user from db
+    if (user === null) {
+        return res.status(400).send("Cannot find user");
+    }
+    try {
+        if (yield bcrypt_1.default.compare(req.body.password, user.password)) {
+            res.send("Success");
+        }
+        else {
+            res.send("Not allowed");
+        }
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).send();
+    }
+});
 exports.loginUser = loginUser;

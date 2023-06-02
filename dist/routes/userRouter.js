@@ -9,5 +9,5 @@ const router = express_1.default.Router();
 // import { getLogin } from "../controllers/loginController";
 const userController_1 = require("../controllers/userController");
 // router.get("/", getLogin);
-router.post("/", userController_1.postUser);
+router.post("/", userController_1.postUser).post("/login", userController_1.loginUser);
 exports.default = router;

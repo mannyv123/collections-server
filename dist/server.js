@@ -39,6 +39,10 @@ app.use((0, cors_1.default)()); //***make sure to set the allowed origin */
 //Routes
 const postsRouter_1 = __importDefault(require("./routes/postsRouter"));
 app.use("/collections", postsRouter_1.default);
+// import loginRouter from "./routes/loginRouter";
+// app.use("/login", loginRouter);
+const userRouter_1 = __importDefault(require("./routes/userRouter"));
+app.use("/user", userRouter_1.default);
 app.listen(PORT, () => {
     console.log(`Express server listening on port: ${PORT}`);
 });

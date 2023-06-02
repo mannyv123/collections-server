@@ -15,6 +15,12 @@ app.use(cors()); //***make sure to set the allowed origin */
 import postsRouter from "./routes/postsRouter";
 app.use("/collections", postsRouter);
 
+// import loginRouter from "./routes/loginRouter";
+// app.use("/login", loginRouter);
+
+import userRouter from "./routes/userRouter";
+app.use("/user", userRouter);
+
 app.listen(PORT, () => {
     console.log(`Express server listening on port: ${PORT}`);
 });

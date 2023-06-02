@@ -65,7 +65,7 @@ export const postUser = async (req: Request, res: Response) => {
         req.body.profile_img = profileImg;
         req.body.cover_img = coverImg;
         const result = await db("users").insert(req.body);
-        // res.status(200).send(result);
+        res.status(200).send("User successfully created");
     } catch (error) {
         console.log(error);
         res.status(500).send();

@@ -57,7 +57,7 @@ const postUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         req.body.profile_img = profileImg;
         req.body.cover_img = coverImg;
         const result = yield db("users").insert(req.body);
-        // res.status(200).send(result);
+        res.status(200).send("User successfully created");
     }
     catch (error) {
         console.log(error);

@@ -6,11 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authMiddleware = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const { JWT_SECRET } = process.env;
-// declare module "express" {
-//     interface Request {
-//         user?:
-//     }
-// }
 const authMiddleware = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader)
@@ -23,8 +18,9 @@ const authMiddleware = (req, res, next) => {
         //     }
         //     req.user = payload
         // });
+        //need to check if this is okay
         const decodedToken = jsonwebtoken_1.default.verify(jwtToken, JWT_SECRET);
-        req.body.user = decodedToken; //need to change
+        req.user = decodedToken;
         next();
     }
     catch (error) {

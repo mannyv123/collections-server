@@ -1,12 +1,18 @@
 import { Request, Response, NextFunction } from "express";
-import jwt, { Secret } from "jsonwebtoken";
+import jwt, { Secret, JwtPayload } from "jsonwebtoken";
 const { JWT_SECRET } = process.env;
 
-// declare module "express" {
-//     interface Request {
-//         user?:
-//     }
-// }
+interface UserPayload extends JwtPayload {
+    id: string;
+    userId: string;
+    username: string;
+}
+
+declare module "express" {
+    interface Request {
+        user?: UserPayload;
+    }
+}
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
@@ -20,9 +26,10 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
         //     req.user = payload
         // });
 
-        const decodedToken = jwt.verify(jwtToken, JWT_SECRET as Secret);
+        //need to check if this is okay
+        const decodedToken = jwt.verify(jwtToken, JWT_SECRET as Secret) as UserPayload;
 
-        req.body.user = decodedToken; //need to change
+        req.user = decodedToken;
 
         next();
     } catch (error) {

@@ -7,5 +7,5 @@ const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
 //Imported Controller Methods
 const postsController_1 = require("../controllers/postsController");
-router.get("/", postsController_1.getCollections);
+router.get("/", postsController_1.getCollections); //Public route
 exports.default = router;

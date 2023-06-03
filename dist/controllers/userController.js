@@ -35,8 +35,15 @@ const s3Config = {
     region: bucketRegion,
 };
 const s3 = new client_s3_1.S3Client(s3Config);
+//Create new user
 const postUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    if (!((_a = req.files) === null || _a === void 0 ? void 0 : _a.length)) {
+        console.log("no images");
+    }
     //need to add error checking for missing fields
+    const images = req.files;
+    console.log(images);
     try {
         //Hash the provided password
         const salt = yield bcrypt_1.default.genSalt();
@@ -46,11 +53,11 @@ const postUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const profileImg = (0, uuid_1.v4)();
         const coverImg = (0, uuid_1.v4)();
         //Update profile and cover image to S3
-        // const params = {
+        // const paramsProfile = {
         //     Bucket: bucketName,
         //     Key: profileImg,
-        //     Body:
-        // }
+        //     Body: images?[0]
+        // };
         //Add user to db
         req.body.id = (0, uuid_1.v4)();
         req.body.password = hashedPassword;

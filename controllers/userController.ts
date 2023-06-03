@@ -40,8 +40,15 @@ interface User {
     coverImg: string;
 }
 
+//Create new user
 export const postUser = async (req: Request, res: Response) => {
+    if (!req.files?.length) {
+        console.log("no images");
+    }
     //need to add error checking for missing fields
+
+    const images = req.files;
+    console.log(images);
     try {
         //Hash the provided password
         const salt = await bcrypt.genSalt();
@@ -52,12 +59,12 @@ export const postUser = async (req: Request, res: Response) => {
         const coverImg = v4();
 
         //Update profile and cover image to S3
-        // const params = {
+
+        // const paramsProfile = {
         //     Bucket: bucketName,
         //     Key: profileImg,
-        //     Body:
-
-        // }
+        //     Body: images?[0]
+        // };
 
         //Add user to db
         req.body.id = v4();

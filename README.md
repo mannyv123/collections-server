@@ -17,7 +17,7 @@ Clicking on a marker brings up the related photo as a popup, as well as the full
 
 ## Related
 
-- Back end repository: https://github.com/mannyv123/collections-server
+- Front end repository: https://github.com/mannyv123/collections-client
 - Original project: https://collections-capstone.netlify.app/
 
 

@@ -42,7 +42,7 @@ interface User {
 }
 
 //Create new user
-export const postUser = async (req: Request, res: Response) => {
+export const postUser = async (req: Request, res: Response): Promise<void> => {
     //need to add error checking for missing fields
     const images = req.files;
     try {
@@ -208,4 +208,41 @@ async function getUserPostsFromDb(userId: string): Promise<Collection[]> {
 }
 
 //Get User Details
-export const getUserDetails = async (req: Request, res: Response) => {};
+export const getUserProfile = async (req: Request, res: Response) => {
+    try {
+        //Query db to get user info
+        const result = await db("users")
+            .where({ username: req.params.username })
+            .select(
+                "id",
+                "username",
+                "first_name",
+                "last_name",
+                "about",
+                "setup",
+                "profile_img",
+                "cover_img"
+            );
+
+        //Get profile and cover image from S3
+        const coverParams = {
+            Bucket: bucketName,
+            Key: result[0].cover_img,
+        };
+
+        const profileParams = {
+            Bucket: bucketName,
+            Key: result[0].profile_img,
+        };
+
+        const coverCommand = new GetObjectCommand(coverParams);
+        const profileCommand = new GetObjectCommand(profileParams);
+
+        result[0].cover_img_url = await getSignedUrl(s3, coverCommand, { expiresIn: 300 });
+        result[0].profile_img_url = await getSignedUrl(s3, profileCommand, { expiresIn: 300 });
+
+        res.send(result);
+    } catch (error) {
+        console.log(error);
+    }
+};

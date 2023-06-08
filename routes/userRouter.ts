@@ -45,13 +45,13 @@ const upload = multer({ storage: storage });
 
 //Imported Controller Methods
 // import { getLogin } from "../controllers/loginController";
-import { postUser, loginUser, getUserPosts, getUserDetails } from "../controllers/userController";
+import { postUser, loginUser, getUserPosts, getUserProfile } from "../controllers/userController";
 
 // router.get("/", getLogin);
 
 router.route("/").post(upload.array("images"), postUser);
 router.route("/login").post(loginUser);
-router.route("/:userId").get(getUserDetails);
+router.route("/:username").get(getUserProfile);
 router.route("/:userId/posts").get(getUserPosts);
 
 export default router;

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserPosts = exports.loginUser = exports.postUser = void 0;
+exports.getUserProfile = exports.getUserPosts = exports.loginUser = exports.postUser = void 0;
 const knex_1 = __importDefault(require("knex"));
 const knexfile_1 = __importDefault(require("../knexfile"));
 const db = (0, knex_1.default)(knexfile_1.default.development);
@@ -177,3 +177,30 @@ function getUserPostsFromDb(userId) {
         return collections;
     });
 }
+//Get User Details
+const getUserProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        //Query db to get user info
+        const result = yield db("users")
+            .where({ username: req.params.username })
+            .select("id", "username", "first_name", "last_name", "about", "setup", "profile_img", "cover_img");
+        //Get profile and cover image from S3
+        const coverParams = {
+            Bucket: bucketName,
+            Key: result[0].cover_img,
+        };
+        const profileParams = {
+            Bucket: bucketName,
+            Key: result[0].profile_img,
+        };
+        const coverCommand = new client_s3_1.GetObjectCommand(coverParams);
+        const profileCommand = new client_s3_1.GetObjectCommand(profileParams);
+        result[0].cover_img_url = yield (0, s3_request_presigner_1.getSignedUrl)(s3, coverCommand, { expiresIn: 300 });
+        result[0].profile_img_url = yield (0, s3_request_presigner_1.getSignedUrl)(s3, profileCommand, { expiresIn: 300 });
+        res.send(result);
+    }
+    catch (error) {
+        console.log(error);
+    }
+});
+exports.getUserProfile = getUserProfile;

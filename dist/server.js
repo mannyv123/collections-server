@@ -42,7 +42,7 @@ app.use("/collections", postsRouter_1.default);
 // import loginRouter from "./routes/loginRouter";
 // app.use("/login", loginRouter);
 const userRouter_1 = __importDefault(require("./routes/userRouter"));
-app.use("/user", userRouter_1.default);
+app.use("/users", userRouter_1.default);
 app.listen(PORT, () => {
     console.log(`Express server listening on port: ${PORT}`);
 });

@@ -17,6 +17,7 @@ const knex_1 = __importDefault(require("knex"));
 const knexfile_1 = __importDefault(require("../knexfile"));
 const db = (0, knex_1.default)(knexfile_1.default.development);
 const client_s3_1 = require("@aws-sdk/client-s3");
+const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const uuid_1 = require("uuid");
 //AWS S3 Configuration
@@ -108,5 +109,71 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.loginUser = loginUser;
 //Get User Posts (Collections)
-const getUserPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () { });
+const getUserPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = req.params.userId;
+    try {
+        // Pull data from db
+        if (!userId) {
+            return res.send("User ID does not exist or not provided.");
+        }
+        const result = yield getUserPostsFromDb(userId);
+        //Get images from S3 bucket
+        for (const collection of result) {
+            for (const imageInfo of collection.collection_images) {
+                const getObjectParams = {
+                    Bucket: bucketName,
+                    Key: imageInfo.image,
+                };
+                const command = new client_s3_1.GetObjectCommand(getObjectParams);
+                const url = yield (0, s3_request_presigner_1.getSignedUrl)(s3, command, { expiresIn: 300 });
+                imageInfo.imageUrl = url;
+            }
+        }
+        res.send(result);
+    }
+    catch (error) {
+        console.log(error);
+    }
+});
 exports.getUserPosts = getUserPosts;
+//Async function to query db and return user posts
+function getUserPostsFromDb(userId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const rows = yield db
+            .select("collections.id", "collections.title", "collections.description", "collections.user_id", "collection_images.id as image_id", "collection_images.image", "collection_images.title as image_title", "collection_images.latitude", "collection_images.longitude")
+            .from("collections")
+            .where("collections.user_id", userId)
+            .leftJoin(db
+            .select("id", "collection_id", "image", "title", "latitude", "longitude")
+            .from("collection_images")
+            .as("collection_images"), "collections.id", "collection_images.collection_id")
+            .groupBy("collections.id", "collection_images.id");
+        const collections = [];
+        for (const row of rows) {
+            const collectionId = row.id;
+            let collection = collections.find((p) => p.id === collectionId);
+            if (!collection) {
+                collection = {
+                    id: row.id,
+                    title: row.title,
+                    description: row.description,
+                    user_id: row.user_id,
+                    collection_images: [],
+                };
+                collections.push(collection);
+            }
+            if (row.image_id) {
+                const image = {
+                    id: row.image_id,
+                    image: row.image,
+                    imageUrl: "",
+                    title: row.image_title,
+                    latitude: row.latitude,
+                    longitude: row.longitude,
+                };
+                collection.collection_images.push(image);
+            }
+        }
+        return collections;
+    });
+}

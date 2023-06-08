@@ -6,6 +6,7 @@ import { S3Client, GetObjectCommand, S3ClientConfig, PutObjectCommand } from "@a
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import bcrypt from "bcrypt";
 import { v4 } from "uuid";
+import { ImageInfo, Collection } from "../types/types";
 
 //AWS S3 Configuration
 const bucketName: string | undefined = process.env.BUCKET_NAME;
@@ -118,4 +119,90 @@ export const loginUser = async (req: Request, res: Response) => {
 };
 
 //Get User Posts (Collections)
-export const getUserPosts = async (req: Request, res: Response) => {};
+export const getUserPosts = async (req: Request, res: Response) => {
+    const userId = req.params.userId;
+    try {
+        // Pull data from db
+        if (!userId) {
+            return res.send("User ID does not exist or not provided.");
+        }
+        const result: Collection[] = await getUserPostsFromDb(userId);
+
+        //Get images from S3 bucket
+        for (const collection of result) {
+            for (const imageInfo of collection.collection_images) {
+                const getObjectParams = {
+                    Bucket: bucketName,
+                    Key: imageInfo.image,
+                };
+                const command = new GetObjectCommand(getObjectParams);
+                const url = await getSignedUrl(s3, command, { expiresIn: 300 });
+                imageInfo.imageUrl = url;
+            }
+        }
+
+        res.send(result);
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+//Async function to query db and return user posts
+async function getUserPostsFromDb(userId: string): Promise<Collection[]> {
+    const rows = await db
+        .select(
+            "collections.id",
+            "collections.title",
+            "collections.description",
+            "collections.user_id",
+            "collection_images.id as image_id",
+            "collection_images.image",
+            "collection_images.title as image_title",
+            "collection_images.latitude",
+            "collection_images.longitude"
+        )
+        .from("collections")
+        .where("collections.user_id", userId)
+        .leftJoin(
+            db
+                .select("id", "collection_id", "image", "title", "latitude", "longitude")
+                .from("collection_images")
+                .as("collection_images"),
+            "collections.id",
+            "collection_images.collection_id"
+        )
+        .groupBy("collections.id", "collection_images.id");
+
+    const collections: Collection[] = [];
+
+    for (const row of rows) {
+        const collectionId = row.id;
+
+        let collection = collections.find((p) => p.id === collectionId);
+
+        if (!collection) {
+            collection = {
+                id: row.id,
+                title: row.title,
+                description: row.description,
+                user_id: row.user_id,
+                collection_images: [],
+            };
+            collections.push(collection);
+        }
+
+        if (row.image_id) {
+            const image: ImageInfo = {
+                id: row.image_id,
+                image: row.image,
+                imageUrl: "",
+                title: row.image_title,
+                latitude: row.latitude,
+                longitude: row.longitude,
+            };
+            collection.collection_images.push(image);
+        }
+    }
+
+    return collections;
+}

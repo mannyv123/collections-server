@@ -4,6 +4,7 @@ import knex from "knex";
 import config from "../knexfile";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 const db = knex(config.development);
+import { ImageInfo, Collection } from "../types/types";
 
 //AWS S3 Configuration
 const bucketName: string | undefined = process.env.BUCKET_NAME;
@@ -26,23 +27,23 @@ const s3Config: S3ClientConfig = {
 const s3 = new S3Client(s3Config);
 
 //Interfaces
-interface ImageInfo {
-    id: string;
-    image: string;
-    imageUrl: string;
-    title: string;
-    latitude: number;
-    longitude: number;
-}
+// interface ImageInfo {
+//     id: string;
+//     image: string;
+//     imageUrl: string;
+//     title: string;
+//     latitude: number;
+//     longitude: number;
+// }
 
-interface Collection {
-    id: string;
-    title: string;
-    description: string;
-    user_id: string;
-    collection_images: ImageInfo[];
-    // imageUrls: string[];
-}
+// interface Collection {
+//     id: string;
+//     title: string;
+//     description: string;
+//     user_id: string;
+//     collection_images: ImageInfo[];
+//     // imageUrls: string[];
+// }
 
 //Get All Collections
 export const getCollections = async (req: Request, res: Response): Promise<void> => {

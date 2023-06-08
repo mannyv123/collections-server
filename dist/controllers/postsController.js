@@ -34,6 +34,23 @@ const s3Config = {
     region: bucketRegion,
 };
 const s3 = new client_s3_1.S3Client(s3Config);
+//Interfaces
+// interface ImageInfo {
+//     id: string;
+//     image: string;
+//     imageUrl: string;
+//     title: string;
+//     latitude: number;
+//     longitude: number;
+// }
+// interface Collection {
+//     id: string;
+//     title: string;
+//     description: string;
+//     user_id: string;
+//     collection_images: ImageInfo[];
+//     // imageUrls: string[];
+// }
 //Get All Collections
 const getCollections = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {

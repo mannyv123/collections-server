@@ -51,6 +51,7 @@ import { postUser, loginUser, getUserPosts } from "../controllers/userController
 
 router.route("/").post(upload.array("images"), postUser);
 router.route("/login").post(loginUser);
+// router.route("/:userId") need this to get user details
 router.route("/:userId/posts").get(getUserPosts);
 
 export default router;

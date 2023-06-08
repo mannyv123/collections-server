@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import knex from "knex";
 import config from "../knexfile";
 const db = knex(config.development);
-import { S3Client, GetObjectCommand, S3ClientConfig } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand, S3ClientConfig, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import bcrypt from "bcrypt";
 import { v4 } from "uuid";
@@ -42,37 +42,52 @@ interface User {
 
 //Create new user
 export const postUser = async (req: Request, res: Response) => {
-    if (!req.files?.length) {
-        console.log("no images");
-    }
     //need to add error checking for missing fields
-
     const images = req.files;
-    console.log(images);
     try {
         //Hash the provided password
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
-        console.log(hashedPassword);
-        //Create unique profile image and cover image name
-        const profileImg = v4();
-        const coverImg = v4();
 
-        //Update profile and cover image to S3
+        //Create profile image and cover image variables
+        let profileImg = "default_profile.jpeg";
+        let coverImg = "default_cover.jpg";
 
-        // const paramsProfile = {
-        //     Bucket: bucketName,
-        //     Key: profileImg,
-        //     Body: images?[0]
-        // };
+        //Upload profile and cover image to S3
+        if (Array.isArray(images) && images.length) {
+            profileImg = v4();
+            coverImg = v4();
+
+            const coverParams = {
+                Bucket: bucketName,
+                Key: coverImg,
+                Body: images[0].buffer,
+                ContentType: images[0].mimetype,
+            };
+
+            const profileParams = {
+                Bucket: bucketName,
+                Key: profileImg,
+                Body: images[1].buffer,
+                ContentType: images[1].mimetype,
+            };
+
+            await s3.send(new PutObjectCommand(coverParams));
+            await s3.send(new PutObjectCommand(profileParams));
+            console.log("cover params", coverParams);
+            console.log("profile params", profileParams);
+        }
 
         //Add user to db
         req.body.id = v4();
         req.body.password = hashedPassword;
         req.body.profile_img = profileImg;
         req.body.cover_img = coverImg;
-        const result = await db("users").insert(req.body);
-        res.status(200).send("User successfully created");
+
+        console.log("req body", req.body);
+        console.log("req files", req.files);
+        // const result = await db("users").insert(req.body);
+        // res.status(200).send("User successfully created");
     } catch (error) {
         console.log(error);
         res.status(500).send();

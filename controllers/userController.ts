@@ -86,11 +86,11 @@ export const postUser = async (req: Request, res: Response) => {
 
         console.log("req body", req.body);
         console.log("req files", req.files);
-        // const result = await db("users").insert(req.body);
-        // res.status(200).send("User successfully created");
+        await db("users").insert(req.body);
+        res.status(200).send("User successfully created");
     } catch (error) {
         console.log(error);
-        res.status(500).send();
+        res.status(500).send(error);
     }
 };
 

@@ -74,12 +74,12 @@ const postUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         req.body.cover_img = coverImg;
         console.log("req body", req.body);
         console.log("req files", req.files);
-        // const result = await db("users").insert(req.body);
-        // res.status(200).send("User successfully created");
+        yield db("users").insert(req.body);
+        res.status(200).send("User successfully created");
     }
     catch (error) {
         console.log(error);
-        res.status(500).send();
+        res.status(500).send(error);
     }
 });
 exports.postUser = postUser;

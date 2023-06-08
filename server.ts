@@ -19,7 +19,7 @@ app.use("/collections", postsRouter);
 // app.use("/login", loginRouter);
 
 import userRouter from "./routes/userRouter";
-app.use("/user", userRouter);
+app.use("/users", userRouter);
 
 app.listen(PORT, () => {
     console.log(`Express server listening on port: ${PORT}`);

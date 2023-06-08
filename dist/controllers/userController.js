@@ -37,38 +37,49 @@ const s3Config = {
 const s3 = new client_s3_1.S3Client(s3Config);
 //Create new user
 const postUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    if (!((_a = req.files) === null || _a === void 0 ? void 0 : _a.length)) {
-        console.log("no images");
-    }
     //need to add error checking for missing fields
     const images = req.files;
-    console.log(images);
     try {
         //Hash the provided password
         const salt = yield bcrypt_1.default.genSalt();
         const hashedPassword = yield bcrypt_1.default.hash(req.body.password, salt);
-        console.log(hashedPassword);
-        //Create unique profile image and cover image name
-        const profileImg = (0, uuid_1.v4)();
-        const coverImg = (0, uuid_1.v4)();
-        //Update profile and cover image to S3
-        // const paramsProfile = {
-        //     Bucket: bucketName,
-        //     Key: profileImg,
-        //     Body: images?[0]
-        // };
+        //Create profile image and cover image variables
+        let profileImg = "default_profile.jpeg";
+        let coverImg = "default_cover.jpg";
+        //Upload profile and cover image to S3
+        if (Array.isArray(images) && images.length) {
+            profileImg = (0, uuid_1.v4)();
+            coverImg = (0, uuid_1.v4)();
+            const coverParams = {
+                Bucket: bucketName,
+                Key: coverImg,
+                Body: images[0].buffer,
+                ContentType: images[0].mimetype,
+            };
+            const profileParams = {
+                Bucket: bucketName,
+                Key: profileImg,
+                Body: images[1].buffer,
+                ContentType: images[1].mimetype,
+            };
+            yield s3.send(new client_s3_1.PutObjectCommand(coverParams));
+            yield s3.send(new client_s3_1.PutObjectCommand(profileParams));
+            console.log("cover params", coverParams);
+            console.log("profile params", profileParams);
+        }
         //Add user to db
         req.body.id = (0, uuid_1.v4)();
         req.body.password = hashedPassword;
         req.body.profile_img = profileImg;
         req.body.cover_img = coverImg;
-        const result = yield db("users").insert(req.body);
+        console.log("req body", req.body);
+        console.log("req files", req.files);
+        yield db("users").insert(req.body);
         res.status(200).send("User successfully created");
     }
     catch (error) {
         console.log(error);
-        res.status(500).send();
+        res.status(500).send(error);
     }
 });
 exports.postUser = postUser;

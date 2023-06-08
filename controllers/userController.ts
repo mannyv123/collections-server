@@ -206,3 +206,6 @@ async function getUserPostsFromDb(userId: string): Promise<Collection[]> {
 
     return collections;
 }
+
+//Get User Details
+export const getUserDetails = async (req: Request, res: Response) => {};

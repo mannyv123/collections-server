@@ -116,3 +116,6 @@ export const loginUser = async (req: Request, res: Response) => {
         res.status(500).send();
     }
 };
+
+//Get User Posts (Collections)
+export const getUserPosts = async (req: Request, res: Response) => {};

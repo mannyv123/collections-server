@@ -46,4 +46,5 @@ const userController_1 = require("../controllers/userController");
 // router.get("/", getLogin);
 router.route("/").post(upload.array("images"), userController_1.postUser);
 router.route("/login").post(userController_1.loginUser);
+router.route("/:userId/posts").get(userController_1.getUserPosts);
 exports.default = router;

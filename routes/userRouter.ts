@@ -53,6 +53,6 @@ import { postCollection } from "../controllers/postsController";
 router.route("/").post(upload.array("images"), postUser);
 router.route("/login").post(loginUser);
 router.route("/:username").get(getUserProfile);
-router.route("/:userId/posts").get(getUserPosts).post(upload.array("images", postCollection));
+router.route("/:userId/posts").get(getUserPosts).post(upload.array("images"), postCollection);
 
 export default router;

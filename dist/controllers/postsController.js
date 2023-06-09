@@ -18,6 +18,7 @@ const knex_1 = __importDefault(require("knex"));
 const knexfile_1 = __importDefault(require("../knexfile"));
 const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
 const db = (0, knex_1.default)(knexfile_1.default.development);
+const uuid_1 = require("uuid");
 //AWS S3 Configuration
 const bucketName = process.env.BUCKET_NAME;
 const bucketRegion = process.env.BUCKET_REGION;
@@ -119,7 +120,22 @@ function getCollectionsFromDb() {
 //Create new User Post/Collection
 const postCollection = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const images = req.files;
+    const userId = req.params.userId;
+    const { title, description } = req.body;
     try {
+        const postId = (0, uuid_1.v4)();
+        const newCollection = {
+            id: postId,
+            title: title,
+            description: description,
+            user_id: userId,
+        };
+        console.log("images", images);
+        console.log("userId", userId);
+        console.log("req body", req.body);
+        console.log("new collection", newCollection);
+        //Insert new collection to db
+        // await db("collections").insert(newCollection);
     }
     catch (error) {
         console.log(error);

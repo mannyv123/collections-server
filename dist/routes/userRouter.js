@@ -48,5 +48,5 @@ const postsController_1 = require("../controllers/postsController");
 router.route("/").post(upload.array("images"), userController_1.postUser);
 router.route("/login").post(userController_1.loginUser);
 router.route("/:username").get(userController_1.getUserProfile);
-router.route("/:userId/posts").get(userController_1.getUserPosts).post(upload.array("images", postsController_1.postCollection));
+router.route("/:userId/posts").get(userController_1.getUserPosts).post(upload.array("images"), postsController_1.postCollection);
 exports.default = router;

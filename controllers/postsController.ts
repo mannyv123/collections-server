@@ -4,7 +4,8 @@ import knex from "knex";
 import config from "../knexfile";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 const db = knex(config.development);
-import { ImageInfo, Collection } from "../types/types";
+import { ImageInfo, Collection, NewCollection } from "../types/types";
+import { v4 } from "uuid";
 
 //AWS S3 Configuration
 const bucketName: string | undefined = process.env.BUCKET_NAME;
@@ -132,7 +133,25 @@ async function getCollectionsFromDb(): Promise<Collection[]> {
 //Create new User Post/Collection
 export const postCollection = async (req: Request, res: Response): Promise<void> => {
     const images = req.files;
+    const userId = req.params.userId;
+    const { title, description } = req.body;
     try {
+        const postId = v4();
+
+        const newCollection: NewCollection = {
+            id: postId,
+            title: title,
+            description: description,
+            user_id: userId,
+        };
+
+        console.log("images", images);
+        console.log("userId", userId);
+        console.log("req body", req.body);
+        console.log("new collection", newCollection);
+
+        //Insert new collection to db
+        // await db("collections").insert(newCollection);
     } catch (error) {
         console.log(error);
     }

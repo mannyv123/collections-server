@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCollections = void 0;
+exports.postCollection = exports.getCollections = void 0;
 const client_s3_1 = require("@aws-sdk/client-s3");
 const knex_1 = __importDefault(require("knex"));
 const knexfile_1 = __importDefault(require("../knexfile"));
@@ -116,3 +116,13 @@ function getCollectionsFromDb() {
         return collections;
     });
 }
+//Create new User Post/Collection
+const postCollection = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const images = req.files;
+    try {
+    }
+    catch (error) {
+        console.log(error);
+    }
+});
+exports.postCollection = postCollection;

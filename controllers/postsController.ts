@@ -128,3 +128,12 @@ async function getCollectionsFromDb(): Promise<Collection[]> {
     }
     return collections;
 }
+
+//Create new User Post/Collection
+export const postCollection = async (req: Request, res: Response): Promise<void> => {
+    const images = req.files;
+    try {
+    } catch (error) {
+        console.log(error);
+    }
+};

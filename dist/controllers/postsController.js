@@ -135,7 +135,37 @@ const postCollection = (req, res) => __awaiter(void 0, void 0, void 0, function*
         console.log("req body", req.body);
         console.log("new collection", newCollection);
         //Insert new collection to db
-        // await db("collections").insert(newCollection);
+        yield db("collections").insert(newCollection);
+        //Iterate over each image and and save s3 uploads to promise array
+        const filenames = [];
+        const promises = images.map((file) => {
+            const params = {
+                Bucket: bucketName,
+                Key: (0, uuid_1.v4)(),
+                Body: file.buffer,
+                ContentType: file.mimetype,
+            };
+            filenames.push(params.Key);
+            return s3.send(new client_s3_1.PutObjectCommand(params)); //return promises that are stored as array in "promises"
+        });
+        //Call each promise and await all to resolve; all to resolve asyncronously / in parallel
+        yield Promise.all(promises);
+        //Create array of image info for each image in filenames
+        const imageRecords = filenames.map((imageName, index) => {
+            const imageRecord = {
+                id: (0, uuid_1.v4)(),
+                image: imageName,
+                title: req.body.names[index],
+                latitude: req.body.latitudes[index],
+                longitude: req.body.longitudes[index],
+                collection_id: postId,
+            };
+            return imageRecord;
+        });
+        //Insert imageRecords to bd collection_images table
+        yield db("collection_images").insert(imageRecords);
+        //Send successful response
+        res.status(201).send("New collection added");
     }
     catch (error) {
         console.log(error);

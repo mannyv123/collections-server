@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
-import { S3Client, GetObjectCommand, S3ClientConfig } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand, S3ClientConfig, PutObjectCommand } from "@aws-sdk/client-s3";
 import knex from "knex";
 import config from "../knexfile";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 const db = knex(config.development);
-import { ImageInfo, Collection } from "../types/types";
+import { ImageInfo, Collection, NewCollection } from "../types/types";
+import { v4 } from "uuid";
 
 //AWS S3 Configuration
 const bucketName: string | undefined = process.env.BUCKET_NAME;
@@ -128,3 +129,65 @@ async function getCollectionsFromDb(): Promise<Collection[]> {
     }
     return collections;
 }
+
+//Create new User Post/Collection
+export const postCollection = async (req: Request, res: Response): Promise<void> => {
+    const images = req.files as Express.Multer.File[];
+    const userId = req.params.userId;
+    const { title, description } = req.body;
+    try {
+        const postId = v4();
+
+        const newCollection: NewCollection = {
+            id: postId,
+            title: title,
+            description: description,
+            user_id: userId,
+        };
+
+        console.log("images", images);
+        console.log("userId", userId);
+        console.log("req body", req.body);
+        console.log("new collection", newCollection);
+
+        //Insert new collection to db
+        await db("collections").insert(newCollection);
+
+        //Iterate over each image and and save s3 uploads to promise array
+        const filenames: string[] = [];
+        const promises = images.map((file: Express.Multer.File) => {
+            const params = {
+                Bucket: bucketName,
+                Key: v4(),
+                Body: file.buffer,
+                ContentType: file.mimetype,
+            };
+            filenames.push(params.Key);
+            return s3.send(new PutObjectCommand(params)); //return promises that are stored as array in "promises"
+        });
+
+        //Call each promise and await all to resolve; all to resolve asyncronously / in parallel
+        await Promise.all(promises);
+
+        //Create array of image info for each image in filenames
+        const imageRecords = filenames.map((imageName, index) => {
+            const imageRecord = {
+                id: v4(),
+                image: imageName,
+                title: req.body.names[index],
+                latitude: req.body.latitudes[index],
+                longitude: req.body.longitudes[index],
+                collection_id: postId,
+            };
+            return imageRecord;
+        });
+
+        //Insert imageRecords to bd collection_images table
+        await db("collection_images").insert(imageRecords);
+
+        //Send successful response
+        res.status(201).send("New collection added");
+    } catch (error) {
+        console.log(error);
+    }
+};

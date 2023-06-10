@@ -12,12 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCollections = void 0;
+exports.postCollection = exports.getCollections = void 0;
 const client_s3_1 = require("@aws-sdk/client-s3");
 const knex_1 = __importDefault(require("knex"));
 const knexfile_1 = __importDefault(require("../knexfile"));
 const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
 const db = (0, knex_1.default)(knexfile_1.default.development);
+const uuid_1 = require("uuid");
 //AWS S3 Configuration
 const bucketName = process.env.BUCKET_NAME;
 const bucketRegion = process.env.BUCKET_REGION;
@@ -116,3 +117,58 @@ function getCollectionsFromDb() {
         return collections;
     });
 }
+//Create new User Post/Collection
+const postCollection = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const images = req.files;
+    const userId = req.params.userId;
+    const { title, description } = req.body;
+    try {
+        const postId = (0, uuid_1.v4)();
+        const newCollection = {
+            id: postId,
+            title: title,
+            description: description,
+            user_id: userId,
+        };
+        console.log("images", images);
+        console.log("userId", userId);
+        console.log("req body", req.body);
+        console.log("new collection", newCollection);
+        //Insert new collection to db
+        yield db("collections").insert(newCollection);
+        //Iterate over each image and and save s3 uploads to promise array
+        const filenames = [];
+        const promises = images.map((file) => {
+            const params = {
+                Bucket: bucketName,
+                Key: (0, uuid_1.v4)(),
+                Body: file.buffer,
+                ContentType: file.mimetype,
+            };
+            filenames.push(params.Key);
+            return s3.send(new client_s3_1.PutObjectCommand(params)); //return promises that are stored as array in "promises"
+        });
+        //Call each promise and await all to resolve; all to resolve asyncronously / in parallel
+        yield Promise.all(promises);
+        //Create array of image info for each image in filenames
+        const imageRecords = filenames.map((imageName, index) => {
+            const imageRecord = {
+                id: (0, uuid_1.v4)(),
+                image: imageName,
+                title: req.body.names[index],
+                latitude: req.body.latitudes[index],
+                longitude: req.body.longitudes[index],
+                collection_id: postId,
+            };
+            return imageRecord;
+        });
+        //Insert imageRecords to bd collection_images table
+        yield db("collection_images").insert(imageRecords);
+        //Send successful response
+        res.status(201).send("New collection added");
+    }
+    catch (error) {
+        console.log(error);
+    }
+});
+exports.postCollection = postCollection;

@@ -16,3 +16,5 @@ export interface Collection {
     collection_images: ImageInfo[];
     // imageUrls: string[];
 }
+
+export interface NewCollection extends Omit<Collection, "collection_images"> {}

@@ -246,3 +246,14 @@ export const getUserProfile = async (req: Request, res: Response) => {
         console.log(error);
     }
 };
+
+//Get Username
+export const getUsername = async (req: Request, res: Response) => {
+    const userId = req.params.id;
+    try {
+        const result = await db("users").where({ id: userId }).select("username");
+        res.send(result);
+    } catch (error) {
+        console.log(error);
+    }
+};

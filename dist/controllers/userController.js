@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserProfile = exports.getUserPosts = exports.loginUser = exports.postUser = void 0;
+exports.getUsername = exports.getUserProfile = exports.getUserPosts = exports.loginUser = exports.postUser = void 0;
 const knex_1 = __importDefault(require("knex"));
 const knexfile_1 = __importDefault(require("../knexfile"));
 const db = (0, knex_1.default)(knexfile_1.default.development);
@@ -204,3 +204,15 @@ const getUserProfile = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getUserProfile = getUserProfile;
+//Get Username
+const getUsername = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = req.params.id;
+    try {
+        const result = yield db("users").where({ id: userId }).select("username");
+        res.send(result);
+    }
+    catch (error) {
+        console.log(error);
+    }
+});
+exports.getUsername = getUsername;

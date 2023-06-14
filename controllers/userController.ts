@@ -257,3 +257,13 @@ export const getUsername = async (req: Request, res: Response) => {
         console.log(error);
     }
 };
+
+//Get All Usernames
+export const getAllUsernames = async (req: Request, res: Response) => {
+    try {
+        const result = await db("users").select("username");
+        res.send(result);
+    } catch (error) {
+        console.log(error);
+    }
+};

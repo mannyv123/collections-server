@@ -51,12 +51,13 @@ import {
     getUserPosts,
     getUserProfile,
     getUsername,
+    getAllUsernames,
 } from "../controllers/userController";
 import { postCollection } from "../controllers/postsController";
 
 // router.get("/", getLogin);
 
-router.route("/").post(upload.array("images"), postUser);
+router.route("/").post(upload.array("images"), postUser).get(getAllUsernames);
 router.route("/login").post(loginUser);
 router.route("/:username").get(getUserProfile);
 router.route("/username/:id").get(getUsername);

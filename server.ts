@@ -9,7 +9,11 @@ const PORT = process.env.PORT || 5001;
 
 //Middleware
 app.use(express.json());
-app.use(cors()); //***make sure to set the allowed origin */
+app.use(
+    cors({
+        origin: "https://project-collections.netlify.app/",
+    })
+);
 
 //Routes
 import postsRouter from "./routes/postsRouter";

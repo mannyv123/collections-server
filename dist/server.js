@@ -35,7 +35,9 @@ dotenv.config({ path: ".env.development.local" });
 const PORT = process.env.PORT || 5001;
 //Middleware
 app.use(express_1.default.json());
-app.use((0, cors_1.default)()); //***make sure to set the allowed origin */
+app.use((0, cors_1.default)({
+    origin: "https://project-collections.netlify.app/",
+}));
 //Routes
 const postsRouter_1 = __importDefault(require("./routes/postsRouter"));
 app.use("/collections", postsRouter_1.default);
